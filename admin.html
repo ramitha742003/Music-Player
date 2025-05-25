@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Manage Songs</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Include header -->
+    <special-header></special-header>
+
+    <div class="container my-5">
+      <h1 class="text-center">ADMIN PANEL - Manage Songs</h1>
+      <hr />
+      <br />
+
+      <!-- Form to add a new song -->
+      <h3 style="text-align: center">Add New Song</h3>
+      <br />
+      <form id="admin-form">
+        <div class="mb-3">
+          <label for="song-name" class="form-label">Song Name</label>
+          <input type="text" class="form-control" id="song-name" required />
+        </div>
+        <div class="mb-3">
+          <label for="song-artist" class="form-label">Artist</label>
+          <input type="text" class="form-control" id="song-artist" required />
+        </div>
+        <div class="mb-3">
+          <label for="song-image" class="form-label">Song Image URL</label>
+          <input type="url" class="form-control" id="song-image" required />
+        </div>
+        <div class="mb-3">
+          <label for="song-music" class="form-label">Song Music File URL</label>
+          <input type="url" class="form-control" id="song-music" required />
+        </div>
+        <br />
+        <button type="submit" class="btn btn-primary">Add Song</button>
+      </form>
+      <br />
+
+      <hr />
+
+      <h3 class="mt-5" style="text-align: center">Existing Songs</h3>
+      <br /><br />
+      <div class="row" id="song-list">
+        <!-- Song list will be populated dynamically here -->
+      </div>
+    </div>
+
+    <!-- Include footer -->
+    <special-footer></special-footer>
+
+    <script src="headerfooter.js"></script>
+
+    <script>
+      // Change the background color of the navbar when the user scrolls
+      window.addEventListener("scroll", function () {
+        const navbar = document.querySelector("header");
+        if (window.scrollY > 50) {
+          navbar.classList.add("bg-dark-scroll");
+        } else {
+          navbar.classList.remove("bg-dark-scroll");
+        }
+      });
+
+      // Render the list of songs when the page is loaded
+      function renderSongs() {
+        const songListContainer = document.getElementById("song-list");
+        songListContainer.innerHTML = ""; // Clear any previous content
+
+        const songs = JSON.parse(localStorage.getItem("music_list")) || [];
+        if (songs.length === 0) {
+          songListContainer.innerHTML = `<p class="text-center">No songs available!</p>`;
+        }
+
+        songs.forEach((song, index) => {
+          const songDiv = document.createElement("div");
+          songDiv.classList.add("col-md-3", "col-sm-6", "mb-4"); // Use Bootstrap's grid to align cards
+
+          songDiv.innerHTML = `
+            <div class="card">
+              <img src="${song.img}" class="card-img-top" alt="${song.name}">
+              <div class="card-body">
+                <h5 class="card-title">${song.name}</h5>
+                <p class="card-text">${song.artist}</p>
+                <button class="btn btn-danger" onclick="deleteSong(${index})">Delete</button>
+              </div>
+            </div>
+          `;
+          songListContainer.appendChild(songDiv);
+        });
+      }
+
+      // Handle adding a song
+      document
+        .getElementById("admin-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const name = document.getElementById("song-name").value;
+          const artist = document.getElementById("song-artist").value;
+          const image = document.getElementById("song-image").value;
+          const music = document.getElementById("song-music").value;
+
+          const newSong = { name, artist, img: image, music };
+
+          const songs = JSON.parse(localStorage.getItem("music_list")) || [];
+          songs.push(newSong);
+          localStorage.setItem("music_list", JSON.stringify(songs));
+
+          // Clear the form and render the updated list
+          document.getElementById("admin-form").reset();
+          renderSongs();
+        });
+
+      // Handle deleting a song
+      function deleteSong(index) {
+        let songs = JSON.parse(localStorage.getItem("music_list")) || [];
+        songs.splice(index, 1); // Remove the song at the given index
+        localStorage.setItem("music_list", JSON.stringify(songs));
+        alert("Song deleted from Admin and Home page!");
+        renderSongs(); // Re-render the updated song list
+      }
+
+      // Load songs when the page is loaded
+      window.onload = renderSongs;
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
